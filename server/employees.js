@@ -157,29 +157,26 @@ employeesRouter.get('/:employeeId/timesheets', (req, res, next) => {
 employeesRouter.post('/:employeeId/timesheets', (req, res, next) => {
 
 	let newTimesheet = req.body.timesheet;
+  	
   	if(!newTimesheet.hours || 
-     !newTimesheet.rate || 
-     !newTimesheet.date) {
-    res.sendStatus(400);
+       !newTimesheet.rate || 
+       !newTimesheet.date) {
+  			res.sendStatus(400);
+  	} else {
 
-} 	else {
-    db.run(
-      `INSERT INTO Timesheet (hours, rate, date) 
-      VALUES ($hours, $rate, $date)`, 
-      {
-        $hours: newTimesheet.hours,
-        $rate: newTimesheet.rate, 
-        $date: newTimesheet.date
-      }, function (err) {
-      	if(err) {
-          res.sendStatus(500);
-        } 
-        else {
-          db.get(`SELECT * FROM Timesheet WHERE id = ${this.lastID}`, (err, row) => {
-            res.status(201).send({timesheet: row});
-          })
-        }
-      })
+	    db.run(
+	      `INSERT INTO Timesheet (hours, rate, date, employee_id) 
+	      VALUES ($hours, $rate, $date, $employee_id)`, 
+	      {
+	        $hours: newTimesheet.hours,
+	        $rate: newTimesheet.rate, 
+	        $date: newTimesheet.date,
+	        $employee_id: req.params.employeeId
+	      }, function (err) {
+      		db.get(`SELECT * FROM Timesheet WHERE id = ${this.lastID}`, (err, row) => {
+	            res.status(201).send({timesheet: row});
+          	})
+	      })
 	}
 })
 
@@ -191,10 +188,10 @@ employeesRouter.put('/:employeeId/timesheets/:timesheetId', (req, res, next) => 
 	
 	 let newTimesheet = req.body.timesheet;
   	if(!newTimesheet.hours || 
-     !newTimesheet.rate || 
-     !newTimesheet.date ||
-     !newTimesheet.employeeId) {
-    res.sendStatus(400);
+       !newTimesheet.rate || 
+       !newTimesheet.date) {
+
+  		res.sendStatus(400);
   
   } else {
 
@@ -203,8 +200,7 @@ employeesRouter.put('/:employeeId/timesheets/:timesheetId', (req, res, next) => 
       db.run(getUpdateTimesheetSQL('hours', newTimesheet.hours, req.params.timesheetId));
       db.run(getUpdateTimesheetSQL('rate', newTimesheet.rate, req.params.timesheetId));
       db.run(getUpdateTimesheetSQL('date', newTimesheet.date, req.params.timesheetId));
-      db.run(getUpdateTimesheetSQL('employee_id', newTimesheet.timesheetId, req.params.timesheetId));
-      
+      db.run(getUpdateTimesheetSQL('employee_id', req.params.employeeId, req.params.timesheetId));
       
       db.get('SELECT * FROM Timesheet WHERE id = $id', 
         {$id: req.params.timesheetId}, 
