@@ -41,8 +41,8 @@ FOREIGN KEY(menu_id) REFERENCES Menu(id)
 
   db.run(create_employee_sql);
   db.run(create_timesheet_sql);
-	db.run(create_menu_sql);
-	db.run(create_menuItem_sql);
+  db.run(create_menu_sql);
+  db.run(create_menuItem_sql);
 });
 
 // module.exports = migration;
